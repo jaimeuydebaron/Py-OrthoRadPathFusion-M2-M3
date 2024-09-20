@@ -11,23 +11,24 @@ For this you will need to pip install:
 -     scipy
 -     Other ones I have forgot to mention...?
 
-Execute b_RunScript.py
--- GUI allows input of the filepath to spline_ma & mb (the splines you createdin 3DSlicer previous which should roughly intersect with the location that elucdian measurements in the lab went to) and f_ref from 3DSlicer to variables fileS1, fildS2 and fileF1 variables respectively.
--- input for where output file should go
--- input of what the suffix of the bisection is
--- labrotory offset measurements (this is the total sum of tissue shaved off the blockface before reaching that used in the histology slide). Set as 0 if there was no/minimal shaving
--- 
+>> Execute b_RunScript.py
+- GUI allows input of the filepath to spline_ma & mb (the splines you createdin 3DSlicer previous which should roughly intersect with the location that elucdian measurements in the lab went to) and f_ref from 3DSlicer to variables fileS1, fildS2 and fileF1 variables respectively.
+- input for where output file should go
+- input of what the suffix of the bisection is
+- labrotory offset measurements (this is the total sum of tissue shaved off the blockface before reaching that used in the histology slide). Set as 0 if there was no/minimal shaving
+ 
 
-**Customisation:
+>> Customisation:
 GUI inputs can be bypassed by commenting and uncommenting lines in 'testing' for adequately filling the variables required
 
-***********
-Future Development opportunities:
-- Integration of script into 3DSlicer extension (Or plug into something like RAPSODI, but will need reword to cope with non-serial slicing)
-
-Intended use of planes from this script:
+>> Intended use of planes from this script:
 - Drag or import created .json planes into 3DSlicer scene where original splines (and fiducial) control point came from. 
 - Constrain each histology image you import to the corresponding plane from this script, continue the histology co-location process as described in XXXXXXXXXXXXX 
+
+***********
+>> Future Development opportunities:
+- Integration of script into 3DSlicer extension (Or plug into something like RAPSODI, but will need reword to cope with non-serial slicing)
+
 
 Youtube guide:
 #######  url  ##############
