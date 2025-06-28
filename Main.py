@@ -49,7 +49,7 @@ Change user flags to True/False as needed
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Produces a simple User-Interface for 3DSlicer created spline and laboratory measurement inputs
-inputUI = True  
+inputUI = False  
 
 # If making false, turn to commenting/uncommenting secitons in b_Specimens.py file for guiding DataStorage searching
 if inputUI == False:
