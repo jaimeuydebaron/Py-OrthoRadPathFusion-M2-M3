@@ -1,5 +1,6 @@
 """ 
-Description: Seraliser for writing to JSON - writing 
+Description: 
+Seraliser for writing to JSON - writing 
 
 History:
 > Created by Robert Phillips 2024-03

@@ -49,7 +49,8 @@ Change user flags to True/False as needed
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # Produces a simple User-Interface for 3DSlicer created spline and laboratory measurement inputs
-inputUI = False  
+inputUI = True  
+
 # If making false, turn to commenting/uncommenting secitons in b_Specimens.py file for guiding DataStorage searching
 if inputUI == False:
     selected_method = 3 # Manually change this method between 1, 2, and 3 for M1, M2 and M3
@@ -59,6 +60,7 @@ writeOn = False
 
 # Make true if you want to plot the planes
 plot = True # If true, plot function is on
+
 plotCommon = True # Plot the common intersection points of the two splines
 plotAllS3intersect = False # Plot all intersection points of S3 with S1 and S2
 plotM1 = True # Plot the M1 plane
@@ -81,6 +83,7 @@ from c_writeScript import writeRunning
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 """ end-User Interface for data input """
+
 if inputUI:
     
     # Method Selection
@@ -143,9 +146,13 @@ if inputUI:
     offset_gui = GUIs.OffsetInputs(len(dmatrix))
     offsets, sign = offset_gui.run()
     print(f"Offsets: {offsets}, Sign: {sign}")
-
 else:
     from b_Specimens import name, dmatrix, offsets, sign, fileS1, fileS2, fileS3, fileF1, bisection # comment this in if using sample data
+
+if selected_method == 3:
+    useM3 = True
+else:
+    useM3 = False
 
 if writeOn:
     # Output directory decision
@@ -172,39 +179,31 @@ S2 = SplineClass()
 S2.readfunc(fileS2)
 S2.convLists2Tuple()
 
-# For M3
-S3 = SplineClass()
-S3.readfunc(fileS3)
-S3.convLists2Tuple()
+if useM3:
+    # For M3
+    S3 = SplineClass()
+    S3.readfunc(fileS3)
+    S3.convLists2Tuple()
+else:
+    S3 = SplineClass() # If not using M3, S3 is just an empty spline class
 
 F1 = SplineClass()
 F1.readfunc(fileF1)
 F1.convLists2Tuple()
 Fiducial = F1.xlist[0], F1.ylist[0], F1.zlist[0]
 
-if selected_method == 3:
-    useM3 = True
-else:
-    useM3 = False
-
-# Notes - the problem with modularising it this much is that the third spline needs to always be measured even if using M1 or M2
-
-# Processing splines data with b_SplineCalculations and SplineProcessingClass
-splineData = SplineProcessingClass(S1, S2, S3, Fiducial, useM3) # Processes the spline sample points
-splineData.fitPoly() # Fits a polynomial to the spline points
-splineData.splineIntersecPoints(dmatrix) # Finds the coordinates of each intersection point using the fiducial measurement
-splineData.diffCurves() # Differentiates the polynomial for the use of tangent calculations
-splineData.midpoints() # Calculates the midpoint of each corresponding intersection point set
-splineData.betweenSplines() # Calculates the vector between each corresponding intersection point set
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Process splines data using SplineProcessingClass
+splineData = SplineProcessingClass(S1, S2, S3, Fiducial, useM3)
+splineData.fitPoly()
+splineData.splineIntersecPoints(dmatrix)
+splineData.diffCurves()
+splineData.midpoints()
+splineData.betweenSplines()
 npmidpoints = S1.midpoints
 
-if selected_method == 3:
-    # Processing splines data with b_SplineCalculations and SplineProcessingClassM3
-    splineDataM3 = SplineProcessingClass(S1, S2, S3, Fiducial, useM3) # Processes the spline sample points
-    splineDataM3.fitPoly() # Fits a polynomial to the spline points
-    splineDataM3.splineIntersecPoints(dmatrix) # Finds the coordinates of each intersection point using the fiducial measurement
-    splineDataM3.midpoints()
-    splineData.betweenSplines()
+# For method 3, reuse splineData for all processing (no need for separate splineDataM3)
+# All necessary processing is already handled above based on useM3 flag
 
 # Calculated intersection points
 S1.intx = [item[0] for item in S1.intersec] # Extracting S1 intersection x values for all itersection points
@@ -339,7 +338,7 @@ S3coeffY = np.polyfit(S3z, S3y, 3)
 
 S3M1intersections = findIntersectionPoints(S3coeffX, S3coeffY, M1npPlnCoeff)
 S3M2intersections = findIntersectionPoints(S3coeffX, S3coeffY, M2npPlnCoeff)
-S3M3intersections = splineDataM3.S3.intersec
+S3M3intersections = splineData.S3.intersec
 
 # Call the plot_planes function with the appropriate parameters
 

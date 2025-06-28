@@ -256,8 +256,6 @@ class NumberTableGUIM3:
         self.root.mainloop()
         return self.table
 
-
-
 class OffsetInputs:
     def __init__(self, length):
         self.length = length

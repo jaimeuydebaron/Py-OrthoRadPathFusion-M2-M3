@@ -69,8 +69,6 @@ class SplineProcessingClass:
         2. Differentiates these cubic functions for S1 and S2
         3. Iteratively obtains the coordinates/points on the spline using Newton-Raphson and the Euclidean matrix in dmatrix 
         4. Obtains the coordinates(?) for the tangent to the point at the chosen/solved for spline points
-
-
     """   
     def __init__(self, S1, S2, S3, Fiducial, useM3):
         # Class attributes

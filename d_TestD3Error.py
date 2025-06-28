@@ -268,16 +268,3 @@ if printAllMeasurements:
         print(f"d3 {'':<5}{i:<7}: {d3[i]:<15.4f}: {d3[i]:<15.4f}: {d3[i]:<15.4f}")
     
     print(" ")
-
-
-# if printPlanes:
-#     printPlanes()
-
-# if printErrorAverage:
-#     printErrorAverage()
-
-# if printErrorAll:
-#     printErrorAll()
-
-# if printAllMeasurements:
-#     printAllMeasurements()
