@@ -291,6 +291,7 @@ class OffsetInputs:
             try:
                 self.values = [float(entry.get()) for entry in entries]
                 self.sign = 1 if sign_var.get() == "+" else -1
+                root.quit()
                 root.destroy()
             except ValueError:
                 messagebox.showerror("Input Error", "Please enter valid numbers.")
