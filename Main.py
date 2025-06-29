@@ -51,21 +51,11 @@ Change user flags to True/False as needed
 # Produces a simple User-Interface for 3DSlicer created spline and laboratory measurement inputs
 inputUI = False  
 
-# If making false, turn to commenting/uncommenting secitons in b_Specimens.py file for guiding DataStorage searching
-if inputUI == False:
-    selected_method = 3 # Manually change this method between 1, 2, and 3 for M1, M2 and M3
-
 # If user wants to turn off writing json planes to file for input to 3DSlicer
 writeOn = False 
 
-# Make true if you want to plot the planes
-plot = True # If true, plot function is on
-
-plotCommon = True # Plot the common intersection points of the two splines
-plotAllS3intersect = False # Plot all intersection points of S3 with S1 and S2
-plotM1 = True # Plot the M1 plane
-plotM2 = False # Plot the M2 plane
-plotM3 = False # Plot the M3 plane
+# If user wants to have quick visualisation of the planes they are plotting with their selected method
+plotsimple = True
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -80,20 +70,22 @@ import a_importguis as GUIs # For user interface
 from b_SplineCalculations import SplineClass, SplineProcessingClass # For spline processing
 from b_GeometricManipulations import GeometricM1Class, GeometricM2Class, GeometricM3Class # For plane calculations
 from c_writeScript import writeRunning
+import matplotlib.pyplot as plt  # For simple plotting funcitonality
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 """ end-User Interface for data input """
 
+# Method Selection
+selector = GUIs.MethodSelector()
+selected_method = selector.run()
+if selected_method:
+    print(f"Selected Method: M{selected_method}")
+else:
+    print("No method was selected.")
+
+# Running GUIs
 if inputUI:
-    
-    # Method Selection
-    selector = GUIs.MethodSelector()
-    selected_method = selector.run()
-    
-    if selected_method:
-        print(f"Selected Method: M{selected_method}")
-    else:
-        print("No method was selected.")
     
     if selected_method == 1 or selected_method == 2:
 
@@ -217,14 +209,12 @@ if selected_method == 3:
     S3.inty = [item[1] for item in S3.intersec] # Extracting S2 intersection y values for all itersection points
     S3.intz = [item[2] for item in S3.intersec] # Extracting S2 intersection z values for all itersection points
 
-
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 """ Method 1 """
 
 CalcM1 = GeometricM1Class(S1, S2)
 CalcM1.geometricTangCalcs(S1, S2)
-
 M1npPlnCoeff = CalcM1.planeCoeffs
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -278,88 +268,65 @@ if writeOn:
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 """ Plotting module """
-from b_Plot import plot_planes
-from scipy.optimize import fsolve
-import numpy as np
-
-def findIntersectionPoints(coeffX, coeffY, planeCoefficients):
-    """
-    Is called to find the intersection points of S3 cubic polynomial curve with planes for M1 and M2.
-
-    Parameters:
-    coeffX (numpy array): Coefficients of the cubic polynomial for the x-axis.
-    coeffY (numpy array): Coefficients of the cubic polynomial for the y-axis.
-    planeCoefficients (numpy array): A 2D array where each row represents the coefficients [a, b, c, d] of a plane.
-
-    Returns:
-    intersectionPoints (list): A list of lists or arrays, each containing the intersection points (x, y, z) for each plane.
-    """
+if plotsimple == True:
     
-    intersectionPoints = []
+    """ Plotting admin """
+    # Creating plot
+    fig = plt.figure(figsize = (12,12))
+    ax = fig.add_subplot(projection='3d')
 
-    # Loop over all the rows of plane coefficients
-    for plane in planeCoefficients:
-        a, b, c, d = plane  # Extract plane coefficients
+    # Creating array for plotting curves
+    z_new1 = np.linspace(S1.ztup[0], S1.ztup[-1], 100)
+    x_new1 = S1.XfromZequ(z_new1) # Creating x's from x's
+    y_new1 = S1.YfromZequ(z_new1) # creating y's from z's
 
-        # Define the function to represent the plane equation with the parametric equations substituted
-        def planeIntersection(t): #t=z
-            # Parametric equations of the curve (x(t), y(t), z(t)) using the fitted coefficients
-            x = np.polyval(coeffX, t)
-            y = np.polyval(coeffY, t)
-            #z = np.polyval(coeffZ, t)
 
-            # Plane equation a*x + b*y + c*z + d = 0
-            return a * x + b * y + c * t + d
+    z_new2 = np.linspace(S2.ztup[0], S2.ztup[-1], 100)
+    x_new2 = S2.XfromZequ(z_new2)
+    y_new2 = S2.YfromZequ(z_new2)
 
-        # Use fsolve to find the roots of the equation (i.e., solve for z)
-        initialGuess = np.mean(S3.zlist) # Initial guess for t. Start by guessing in the middle of the spline (z axis)
-        zSolution = fsolve(planeIntersection, initialGuess)
+    # Plotting fiducial reference point and curves
+    ax.scatter(F1.xlist,F1.ylist,F1.zlist, c="g") # Fiducial location from 3DSlicer
+    ax.plot(x_new1, y_new1, z_new1, c="r", label="Curve Fit to File 1") # Polynomial fitted
+    ax.plot(x_new2, y_new2, z_new2, c="k", label="Curve Fit to File 2") # Polynomial fitted
 
-        # Calculate the intersection points (x(t), y(t), z(t)) at the found t values
-        planeIntersections = []
-        # for z in zSolution:
-        x_intersection = np.polyval(coeffX, zSolution)
-        y_intersection = np.polyval(coeffY, zSolution)
-        z_intersection = zSolution
+    # Plotting intersection points calculated on S1 and S2 (same between all methods)
+    ax.scatter(S1.intx,S1.inty,S1.intz, label="Intersection Points Curve 1")
+    ax.scatter(S2.intx,S2.inty,S2.intz, label="Intersection Points Curve 2")
+
+    # Calculating planes for plotting
+    size_plane = 4
+    xx_arr = np.zeros((len(npPlnCoeffs), size_plane, size_plane))
+    yy_arr = np.zeros((len(npPlnCoeffs), size_plane, size_plane))
+    zz_arr = np.zeros((len(npPlnCoeffs), size_plane, size_plane))
+    for i in range(len(npPlnCoeffs)):
+        # Extract plane coefficients
+        a_plot, b_plot, c_plot, d_plot = npPlnCoeffs[i]
         
-        planeIntersections.append((x_intersection, y_intersection, z_intersection))
+        # Generate grid points
+        x_vals = np.linspace(S2.intersec[i][0] - 15, S2.intersec[i][0] + 15, size_plane)
+        y_vals = np.linspace(S2.intersec[i][1] - 15, S2.intersec[i][1] + 15, size_plane)
+        xx, yy = np.meshgrid(x_vals, y_vals)
+        
+        # Compute z values with error handling for c_plot == 0
+        if np.isclose(c_plot, 0):
+            zz = np.full_like(xx, np.nan)  # Or handle as a constant plane
+            print(f"Skipping plane {i}: c_plot is zero, parallel to xy-plane.")
+        else:
+            zz = (-a_plot * xx - b_plot * yy - d_plot) / c_plot
 
-        # Append the intersection points for the current plane
-        intersectionPoints.append(planeIntersections)
+        # Append arrays for plotting
+        xx_arr[i, :] = xx
+        yy_arr[i, :] = yy
+        zz_arr[i, :] = zz
 
-    return intersectionPoints
+    # Doing the plotting
+    for p in range(len(npPlnCoeffs)):
+        # Plot the surface
+        surf_m2 = ax.plot_surface(
+            xx_arr[p], yy_arr[p], zz_arr[p], 
+            alpha=0.6, cmap=plt.cm.coolwarm, label=f"Plane {p+1}")
 
-S3x = np.array(S3.xlist)
-S3y = np.array(S3.ylist)
-S3z = np.array(S3.zlist) 
-
-S3coeffX = np.polyfit(S3z, S3x, 3)  
-S3coeffY = np.polyfit(S3z, S3y, 3)  
-
-S3M1intersections = findIntersectionPoints(S3coeffX, S3coeffY, M1npPlnCoeff)
-S3M2intersections = findIntersectionPoints(S3coeffX, S3coeffY, M2npPlnCoeff)
-S3M3intersections = splineData.S3.intersec
-
-# Call the plot_planes function with the appropriate parameters
-
-if plot:
-    plot_planes(
-        plotCommon,
-        plotAllS3intersect,
-        plotM1,
-        plotM2,
-        plotM3,
-        S1,
-        S2,
-        S3,
-        F1,
-        dmatrix,
-        bisection,
-        M1npPlnCoeff,
-        M2npPlnCoeff,
-        M3npPlnCoeff,
-        CalcM2,
-        S3M1intersections,
-        S3M2intersections,
-        S3M3intersections,
-    )
+    plt.gca().set_aspect('equal') # can remove to squash graph, but sets axis aspect ratio equal for visualisation...
+    plt.show()
+	

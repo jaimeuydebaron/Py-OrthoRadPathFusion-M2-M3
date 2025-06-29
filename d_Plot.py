@@ -13,9 +13,15 @@ History:
     
     USAGE NOTES:
     # Use Main.py User debug/modularization interface to identify what data you are plotting.
-        # Deactivate the inputUI and writeOn booleans in b_Main.py - this makes it easier and more straightforward for visualization
-        but you will need to manually uncomment whichever specimen you are using in b_specimen.py...
-        # However, if you want to visualize with the full UI process, reactivate inputUI and writeOn booleans """
+        # Deactivate the inputUI and writeOn booleans in Main.py - this makes it easier and more straightforward for visualization
+            # but you will need to manually uncomment whichever specimen you are using in b_specimen.py...
+            # And you will need to specify 'selected method = 3'
+        # However, if you want to visualize with the full UI process, reactivate inputUI and writeOn booleans. 
+        But you will need to use M3
+"""
+
+"""        # You must use M3 when GUI comes up
+"""
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 """ User debug/modularization interface
@@ -24,9 +30,6 @@ History:
 
 import matplotlib.pyplot as plt # For plotting planes
 import numpy as np # For array calculations
-
-# from Main import S1, S2, S3, F1, dmatrix, bisection, M1npPlnCoeff, M2npPlnCoeff, M3npPlnCoeff, CalcM2
-# from d_TestD3Error import S3M1intersections,S3M2intersections, S3M3intersections
 import numpy as np
 
 # Plotting
